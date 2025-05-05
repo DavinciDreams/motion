@@ -1,28 +1,45 @@
 'use client';
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 
 interface EditorProps {
   content: string;
+  docId: string;
   onUpdate: (content: string) => void;
 }
 
-export default function Editor({ content, onUpdate }: EditorProps) {
+export default function Editor({ content, docId, onUpdate }: EditorProps) {
   const editor = useEditor({
     extensions: [StarterKit],
     content,
-    onUpdate: ({ editor }) => onUpdate(editor.getHTML()),
+    onUpdate: ({ editor }) => {
+      const newContent = editor.getHTML();
+      onUpdate(newContent);
+      // Send update to server
+      fetch("/api/ws", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ docId, content: newContent }),
+      });
+    },
   });
 
+  // Poll for updates every 5 seconds
   useEffect(() => {
     if (!editor) return;
-    const ws = new WebSocket("ws://localhost:3000/api/ws");
-    ws.onmessage = (event) => {
-      editor.commands.setContent(event.data);
+
+    const pollUpdates = async () => {
+      const response = await fetch(`/api/ws?docId=${docId}`);
+      const data = await response.json();
+      if (data.content && data.content !== editor.getHTML()) {
+        editor.commands.setContent(data.content);
+      }
     };
-    return () => ws.close();
-  }, [editor]);
+
+    const interval = setInterval(pollUpdates, 5000);
+    return () => clearInterval(interval);
+  }, [editor, docId]);
 
   return <EditorContent editor={editor} />;
 }

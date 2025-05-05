@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect } from "react";
 import Editor from "../components/Editor";
@@ -14,7 +15,7 @@ export default function Document({ params }: Props) {
   useEffect(() => {
     const token = localStorage.getItem("token");
     fetch(`/api/documents/${params.id}`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then((doc) => setContent(doc.content));
@@ -25,14 +26,14 @@ export default function Document({ params }: Props) {
     await fetch(`/api/documents/${params.id}`, {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ content: newContent })
+      body: JSON.stringify({ content: newContent }),
     });
     setContent(newContent);
   };
 
   return (
     <div className="p-4 space-y-4">
-      <Editor content={content} onUpdate={updateContent} />
+      <Editor content={content} docId={params.id} onUpdate={updateContent} />
       <Canvas />
       <Embed />
     </div>
