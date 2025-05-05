@@ -32,7 +32,25 @@ export default function Canvas() {
   const saveDrawing = async () => {
     const canvas = canvasRef.current!;
     const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/png"));
-    const { url } = await upload("drawing.png", blob, { access: "public" });
+    
+    const { url } = await upload("drawing.png", blob, {
+      access: "public",
+      handleUploadUrl: async (url: string) => {
+        // Perform the upload using a fetch request to the signed URL
+        const response = await fetch(url, {
+          method: "PUT",
+          body: blob,
+          headers: {
+            "Content-Type": "image/png",
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to upload blob");
+        }
+        return response;
+      },
+    });
+
     console.log("Drawing saved:", url);
   };
 
