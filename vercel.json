@@ -1,0 +1,12 @@
+{
+    "builds": [
+      {
+        "src": "next.config.js",
+        "use": "@vercel/next"
+      }
+    ],
+    "routes": [
+      { "src": "/api/ws", "dest": "/api/ws" },
+      { "src": "/(.*)", "dest": "/" }
+    ]
+  }
