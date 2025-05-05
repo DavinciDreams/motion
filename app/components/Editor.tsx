@@ -1,8 +1,6 @@
 'use client';
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Drawing from "@tiptap/extension-drawing";
-import Embed from "@tiptap/extension-embed";
 import { useEffect } from "react";
 
 interface EditorProps {
@@ -12,13 +10,9 @@ interface EditorProps {
 
 export default function Editor({ content, onUpdate }: EditorProps) {
   const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Drawing.configure({ strokeColor: "#000", strokeWidth: 2 }),
-      Embed.configure({ inline: true })
-    ],
+    extensions: [StarterKit],
     content,
-    onUpdate: ({ editor }) => onUpdate(editor.getHTML())
+    onUpdate: ({ editor }) => onUpdate(editor.getHTML()),
   });
 
   useEffect(() => {
